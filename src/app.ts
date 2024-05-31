@@ -5,30 +5,13 @@ import cors from 'cors'
 import path from 'path';
 import dotenv from 'dotenv';
 import http from 'http';
-import { Server as socketIOServer } from 'socket.io';
 dotenv.config();
 import connectToMongo from './database/db';
-import userRouter from './routes/users/userRouter'
-import router from './routes/Assets/chatRoutes';
+import router from './routes/Assets/movieRoutes';
+
 const app = express();
 connectToMongo();
 const server = http.createServer(app);
-
-// Initialize socket.io server
-const io = new socketIOServer(server);
-
-// app.locals.io = io;
-io.on('connection', (socket) => {
-    console.log('Client connected');
-
-    socket.on('message', (message) => {
-        io.emit('message', message);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
-});
 
 
 app.get('/', (req: Request, res: Response) => {
@@ -42,9 +25,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
     'allowedHeaders': ['Authorization', 'Content-Type']
 }))
+app.use(cors())
+app.use('/movie',router)
 
-app.use('/user', userRouter)
-app.use('/chat',router)
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
